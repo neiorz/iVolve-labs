@@ -74,8 +74,6 @@ ls -lh target/calculator.jar
 
 ![mvn clean package BUILD SUCCESS in 1.974 seconds and target/calculator.jar at 3.7K](images/lab1-package.png)
 
-My first try failed: right after `mvn test` I ran `java -jar target/calculator.jar` and got `Error: Unable to access jarfile target/calculator.jar` — `mvn test` only compiles and tests, it never reaches the `package` phase where the jar is created.
-
 After `mvn clean package` the tests ran again (0.049 s), `maven-jar-plugin` built the jar, BUILD SUCCESS in 1.974 s, and `ls -lh` shows `target/calculator.jar` at 3.7K.
 
 ## Step 5: Run the App
