@@ -1,8 +1,6 @@
 # Lab 1: Building and Packaging a Java Application with Maven
 
-- **Track:** Build Tools
 - **Source code:** https://github.com/Ibrahim-Adel15/CalculatorMavenApp.git (copy included in this folder: `CalculatorMavenApp/`)
-- **Status:** ✅ Completed
 
 ## Objective
 
