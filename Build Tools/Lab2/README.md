@@ -139,16 +139,6 @@ Running the packaged jar with inputs `7` and `4`:
 
 ![java -jar build/libs/calculator.jar — running with 7 and 4](images/app-run-verify.png)
 
-```text
-Enter first number: 7
-Enter second number: 4
-a = 7.0, b = 4.0
-Sum: 11.0
-Subtract: 3.0
-Multiply: 28.0
-Divide: 1.75
-```
-
 All results correct → **app verified working** 
 
 ---
