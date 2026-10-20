@@ -1,6 +1,6 @@
 # Lab 1: Building and Packaging a Java Application with Maven
 
-- **Source code:** https://github.com/Ibrahim-Adel15/CalculatorMavenApp.git (copy included in this folder: `CalculatorMavenApp/`)
+- **Source code:** https://github.com/Ibrahim-Adel15/CalculatorMavenApp.git (cloned into this folder: `CalculatorMavenApp/`)
 
 ## Objective
 
@@ -19,148 +19,82 @@ Learn how to use **Apache Maven** to test, build, and package a Java application
 
 ## Step 1: Install Java and Maven
 
-Verify the installed versions:
-
 ```bash
+cd /home/nourz/Desktop/iVolve-labs/Build\ Tools/Lab1
 java -version
 mvn -version
 ```
 
-Output on this machine:
+![java -version showing OpenJDK 21.0.12.1 and mvn -version showing Apache Maven 3.8.7](images/lab1-versions.png)
 
-```text
-openjdk version "21.0.12.1" 2026-08-18
-OpenJDK Runtime Environment (build 21.0.12.1+1-1-24.04.4-Ubuntu)
-Apache Maven 3.8.7
-```
-
-If they are not installed (Ubuntu/Debian):
-
-```bash
-sudo apt update
-sudo apt install -y openjdk-17-jdk maven
-```
-
-> The app targets Java 17 (`maven.compiler.source/target = 17`), so Java 17+ is required. Java 21 also works.
+OpenJDK 21.0.12.1 and Apache Maven 3.8.7 are installed on this machine (Maven home `/usr/share/maven`, Java runtime `/usr/lib/jvm/java-21-openjdk-amd64`). The app targets Java 17, and Java 21 runs it without problems.
 
 ## Step 2: Clone the Source Code
 
 ```bash
+rm -rf CalculatorMavenApp
 git clone https://github.com/Ibrahim-Adel15/CalculatorMavenApp.git
+```
+
+![git clone receiving 21 objects, 4.63 KiB](images/lab1-clone.png)
+
+I deleted the old copy first so the clone was really fresh: 21 objects, 4.63 KiB received.
+
+Then I looked at what is inside:
+
+```bash
 cd CalculatorMavenApp
+ls -la
+ls -R src
 ```
 
-Project structure:
+![ls -la showing pom.xml and src, ls -R src showing the package tree down to CalculatorTest.java](images/lab1-structure.png)
 
-```text
-CalculatorMavenApp/
-├── pom.xml
-└── src/
-    ├── main/java/com/example/calculator/
-    │   ├── Calculator.java      # sum / subtract / multiply / divide
-    │   └── Main.java            # interactive CLI entry point
-    └── test/java/com/example/calculator/
-        └── CalculatorTest.java  # 5 JUnit 5 tests
-```
+`pom.xml` plus `src/` with `main` and `test`. The important parts of the `pom.xml`:
 
-Key points from `pom.xml`:
-- `groupId` `com.example`, `artifactId` `calculator`, `version` `1.0.0`, packaging `jar`.
-- `<finalName>calculator</finalName>` → artifact is named `calculator.jar`.
-- `maven-surefire-plugin:3.2.5` runs the JUnit 5 tests in the `test` phase.
-- `maven-jar-plugin:3.4.1` sets `Main-Class: com.example.calculator.Main` so the jar is runnable with `java -jar`.
+- `<finalName>calculator</finalName>` → the artifact is built as `target/calculator.jar`.
+- `maven-surefire-plugin:3.2.5` runs the 5 JUnit tests in the `test` phase.
+- `maven-jar-plugin:3.4.1` sets `Main-Class: com.example.calculator.Main` → the jar can be started with `java -jar`.
 
-## Step 3: Run Unit Tests
+## Step 3: Run the Unit Tests
 
 ```bash
 mvn test
 ```
 
-Result — **all 5 tests passed**:
+![mvn test showing Tests run 5, no failures, BUILD SUCCESS in 1.837 seconds](images/lab1-test.png)
 
-```text
--------------------------------------------------------
- T E S T S
--------------------------------------------------------
-Running com.example.calculator.CalculatorTest
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.119 s -- in com.example.calculator.CalculatorTest
-
-Results:
-Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
-
-BUILD SUCCESS
-```
-
-Tests cover: `testSum`, `testSubtract`, `testMultiply`, `testDivide`, `testDivideByZeroThrowsException`.
+`Tests run: 5, Failures: 0, Errors: 0, Skipped: 0` and BUILD SUCCESS in 1.837 s (the tests themselves took 0.053 s). The five tests are `testSum`, `testSubtract`, `testMultiply`, `testDivide`, `testDivideByZeroThrowsException`.
 
 ## Step 4: Build the App (Generate the Artifact)
 
 ```bash
 mvn clean package
-```
-
-Verify the artifact was created:
-
-```bash
 ls -lh target/calculator.jar
 ```
 
-```text
--rw-rw-r-- 1 nourz nourz 3.7K Oct 20 17:33 target/calculator.jar
-```
+![mvn clean package BUILD SUCCESS in 1.974 seconds and target/calculator.jar at 3.7K](images/lab1-package.png)
 
-The `package` lifecycle also re-runs the tests (test failures would stop the build), then `maven-jar-plugin` produces the executable jar with this manifest:
+My first try failed: right after `mvn test` I ran `java -jar target/calculator.jar` and got `Error: Unable to access jarfile target/calculator.jar` — `mvn test` only compiles and tests, it never reaches the `package` phase where the jar is created.
 
-```text
-Manifest-Version: 1.0
-Created-By: Maven JAR Plugin 3.4.1
-Main-Class: com.example.calculator.Main
-```
+After `mvn clean package` the tests ran again (0.049 s), `maven-jar-plugin` built the jar, BUILD SUCCESS in 1.974 s, and `ls -lh` shows `target/calculator.jar` at 3.7K.
 
 ## Step 5: Run the App
-
-The app is an interactive CLI that asks for two numbers:
 
 ```bash
 java -jar target/calculator.jar
 ```
 
-It can also be fed input non-interactively:
+![java -jar asking for two numbers, entered 7 and 144](images/lab1-run.png)
 
-```bash
-printf '10\n5\n' | java -jar target/calculator.jar
-```
+It asks for two numbers. I entered 7 and 144: Sum 151.0, Subtract -137.0, Multiply 1008.0, Divide 0.04861111111111111.
 
 ## Step 6: Verify the App Is Working
 
-```text
-Enter first number: Enter second number: a = 10.0, b = 5.0
-Sum: 15.0
-Subtract: 5.0
-Multiply: 50.0
-Divide: 2.0
+```bash
+java -jar target/calculator.jar
 ```
 
-Second test with decimals (`3.5` and `2.5`):
+![second run with decimals, entered 7.3 and 1.123](images/lab1-verify.png)
 
-```text
-a = 3.5, b = 2.5
-Sum: 6.0
-Subtract: 1.0
-Multiply: 8.75
-Divide: 1.4
-```
-
-All results are mathematically correct → **app verified working**.
-
----
-
-## Summary
-
-| Task | Command | Result |
-|------|---------|--------|
-| Install Java & Maven | `java -version` / `mvn -version` | OpenJDK 21, Maven 3.8.7 |
-| Clone source | `git clone ...CalculatorMavenApp.git` | Cloned  |
-| Run unit tests | `mvn test` | 5/5 tests passed |
-| Build app | `mvn clean package` | `target/calculator.jar` generated |
-| Run app | `java -jar target/calculator.jar` | Runs |
-| Verify app | enter `10` and `5` | Sum 15.0, Sub 5.0, Mul 50.0, Div 2.0 |
+Second run with decimals, 7.3 and 1.123: Sum 8.423, Subtract 6.177, Multiply 8.1979, Divide 6.500445235975067 — all correct, so the app is working.
