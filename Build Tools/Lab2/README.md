@@ -74,15 +74,10 @@ I had **Gradle 4.4.1** installed from Ubuntu's apt (build time 2012), which is t
 - `application { mainClass = ... }` — needs Gradle 8.0 or newer
 - `platform('org.junit:junit-bom:5.10.2')` — needs Gradle 5 or newer
 
-So I fixed it by installing the newest version, Gradle 9.8.2, in my home directory (no sudo needed):
+So I fixed it by installing the newest version, Gradle 9.8.2, in my home directory 
 
-```bash
-curl -sL -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-9.8.2-bin.zip
-unzip -q /tmp/gradle.zip -d ~/.local/share/
-ln -sf ~/.local/share/gradle-9.8.2/bin/gradle ~/.local/bin/gradle
-```
-
-`~/.local/bin` comes before `/usr/bin` in my PATH, so this shadows the old apt version. My open terminal still ran the old one because bash caches command locations, so I cleared the cache with `hash -r` and checked again:
+`~/.local/bin` comes before `/usr/bin` in my PATH, so this shadows the old apt version.
+My open terminal still ran the old one because bash caches command locations, so I cleared the cache with `hash -r` and checked again:
 
 ![hash -r then gradle --version showing Gradle 9.8.2](images/gradle-version-check.png)
 
@@ -101,8 +96,6 @@ With the new version active, the same command now passes:
 
 BUILD SUCCESSFUL in 593 ms
 ```
-
-The JUnit 5 report at `build/test-results/test/TEST-com.example.calculator.CalculatorTest.xml` shows `tests="5" failures="0" errors="0"`: testSum, testSubtract, testMultiply, testDivide and testDivideByZeroThrowsException all pass.
 
 ## Step 5: Build the App (Generate the Artifact)
 
@@ -129,21 +122,12 @@ Manifest-Version: 1.0
 Main-Class: com.example.calculator.Main
 ```
 
-## Step 6: Run the App
-
-```bash
-java -jar build/libs/calculator.jar
-```
-
-The app is an interactive CLI that asks for two numbers.
-
-## Step 7: Verify the App Is Working
+## Step 6&7: Run and Verify the App Is Working
 
 I entered 7 and 4:
 
 ![java -jar build/libs/calculator.jar with inputs 7 and 4](images/app-run-verify.png)
-
-7+4=11, 7-4=3, 7*4=28, 7/4=1.75 — all results are correct, so the packaged app works.
+all results are correct, so the packaged app works.
 
 ---
 
