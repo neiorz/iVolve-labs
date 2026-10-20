@@ -32,7 +32,6 @@ OpenJDK 21.0.12.1 and Apache Maven 3.8.7 are installed on this machine (Maven ho
 ## Step 2: Clone the Source Code
 
 ```bash
-rm -rf CalculatorMavenApp
 git clone https://github.com/Ibrahim-Adel15/CalculatorMavenApp.git
 ```
 
