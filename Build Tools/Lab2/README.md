@@ -135,26 +135,6 @@ java -jar build/libs/calculator.jar
 
 ## Step 6: Verify the App Is Working
 
-Input `10` and `5`:
-
-```text
-Enter first number: Enter second number: a = 10.0, b = 5.0
-Sum: 15.0
-Subtract: 5.0
-Multiply: 50.0
-Divide: 2.0
-```
-
-Input `3.5` and `2.5`:
-
-```text
-a = 3.5, b = 2.5
-Sum: 6.0
-Subtract: 1.0
-Multiply: 8.75
-Divide: 1.4
-```
-
 Running the packaged jar with inputs `7` and `4`:
 
 ![java -jar build/libs/calculator.jar — running with 7 and 4](images/app-run-verify.png)
