@@ -60,6 +60,8 @@ Launcher JVM:  21.0.12.1 (Ubuntu)
 
 > Alternatively: `sdk install gradle 9.8.2` via SDKMAN, or use the included **Gradle Wrapper** (`./gradlew`) which downloads the correct Gradle version automatically — no manual install needed.
 
+> **Note:** if `gradle` still runs the old version in an already-open terminal, it's bash's command cache — run `hash -r` (or open a new terminal) as shown below.
+
 ---
 
 ## Step 1: Install Gradle
@@ -69,6 +71,10 @@ gradle --version
 ```
 
 Verified: **Gradle 9.8.2**, running on OpenJDK 21. (The project targets Java **17** via toolchains; JDK 17 is installed at `/usr/lib/jvm/java-17-openjdk-amd64` and auto-detected by Gradle.)
+
+`hash -r` clears bash's cached command path, and `gradle --version` confirms the new version is active:
+
+![gradle --version after hash -r — Gradle 9.8.2](images/gradle-version-check.png)
 
 ## Step 2: Get the Source Code
 
@@ -98,6 +104,8 @@ gradle test
 BUILD SUCCESSFUL in 18s
 ```
 
+![gradle test — BUILD SUCCESSFUL](images/gradle-test-success.png)
+
 Test report (`build/test-results/test/TEST-com.example.calculator.CalculatorTest.xml`): **tests="5" failures="0" errors="0"** ✅
 
 ## Step 4: Build the App (Generate the Artifact)
@@ -109,6 +117,8 @@ gradle build
 ```text
 BUILD SUCCESSFUL in 1s
 ```
+
+![gradle build — BUILD SUCCESSFUL](images/gradle-build-success.png)
 
 `build` = `check` (which runs the tests) + `jar`. Verify the artifact:
 
@@ -167,6 +177,20 @@ Sum: 6.0
 Subtract: 1.0
 Multiply: 8.75
 Divide: 1.4
+```
+
+Running the packaged jar with inputs `7` and `4`:
+
+![java -jar build/libs/calculator.jar — running with 7 and 4](images/app-run-verify.png)
+
+```text
+Enter first number: 7
+Enter second number: 4
+a = 7.0, b = 4.0
+Sum: 11.0
+Subtract: 3.0
+Multiply: 28.0
+Divide: 1.75
 ```
 
 All results correct → **app verified working** ✅
