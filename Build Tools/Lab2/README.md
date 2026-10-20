@@ -77,7 +77,7 @@ gradle test
 > Task :compileTestJava
 > Task :test
 
-BUILD SUCCESSFUL in 18s
+BUILD SUCCESSFUL in 593 ms
 ```
 
 ![gradle test — BUILD SUCCESSFUL](images/gradle-test-success.png)
