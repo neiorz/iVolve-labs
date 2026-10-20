@@ -1,0 +1,17 @@
+# Part 2: Build locally
+# Java 17 runtime image (JRE only, alpine variant to keep the image small)
+FROM eclipse-temurin:17-jre-alpine
+
+# working directory
+WORKDIR /app
+
+# non-root user (BusyBox adduser on alpine)
+RUN adduser -D -u 1000 appuser
+
+# copy the generated JAR into the image
+COPY --chown=appuser:appuser target/calculator.jar calculator.jar
+
+# run the generated JAR, expose port 8080
+EXPOSE 8080
+USER appuser
+CMD ["java", "-jar", "calculator.jar"]
