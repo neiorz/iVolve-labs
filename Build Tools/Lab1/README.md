@@ -159,8 +159,8 @@ All results are mathematically correct → **app verified working**.
 | Task | Command | Result |
 |------|---------|--------|
 | Install Java & Maven | `java -version` / `mvn -version` | OpenJDK 21, Maven 3.8.7 |
-| Clone source | `git clone ...CalculatorMavenApp.git` | Cloned ✅ |
-| Run unit tests | `mvn test` | 5/5 tests passed ✅ |
-| Build app | `mvn clean package` | `target/calculator.jar` generated ✅ |
-| Run app | `java -jar target/calculator.jar` | Runs ✅ |
-| Verify app | enter `10` and `5` | Sum 15.0, Sub 5.0, Mul 50.0, Div 2.0 ✅ |
+| Clone source | `git clone ...CalculatorMavenApp.git` | Cloned  |
+| Run unit tests | `mvn test` | 5/5 tests passed |
+| Build app | `mvn clean package` | `target/calculator.jar` generated |
+| Run app | `java -jar target/calculator.jar` | Runs |
+| Verify app | enter `10` and `5` | Sum 15.0, Sub 5.0, Mul 50.0, Div 2.0 |
