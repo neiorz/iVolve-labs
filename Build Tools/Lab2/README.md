@@ -91,7 +91,7 @@ gradle build
 ```
 
 ```text
-BUILD SUCCESSFUL in 1s
+BUILD SUCCESSFUL in 615 ms
 ```
 
 ![gradle build — BUILD SUCCESSFUL](images/gradle-build-success.png)
