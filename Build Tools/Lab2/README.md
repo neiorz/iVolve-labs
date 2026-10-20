@@ -1,8 +1,7 @@
 # Lab 2: Building and Packaging a Java Application with Gradle
 
-- **Track:** Build Tools
-- **App:** Calculator (same app as Lab 1, this time built with **Gradle** instead of Maven)
-- **Status:** ✅ Completed
+- **App:** Calculator 
+
 
 ## Objective
 
@@ -31,7 +30,7 @@ A problem occurred evaluating root project 'calculator'.
 > Could not find method java() for arguments [...] on root project 'calculator' of type org.gradle.api.Project.
 ```
 
-**Cause:** the machine had **Gradle 4.4.1** (the old version shipped by Ubuntu's `apt`). The `build.gradle` uses modern syntax that old Gradle doesn't understand:
+**Cause:** I installed **Gradle 4.4.1** (the old version shipped by Ubuntu's `apt`). The `build.gradle` uses modern syntax that old Gradle doesn't understand:
 
 | Syntax in build.gradle | Requires |
 |---|---|
@@ -39,30 +38,7 @@ A problem occurred evaluating root project 'calculator'.
 | `application { mainClass = ... }` | Gradle 8.0+ |
 | `platform('org.junit:junit-bom:...')` | Gradle 5+ |
 
-**Fix:** install a current Gradle (9.8.2 here) instead of the `apt` one:
-
-```bash
-# download & install to user directory (no sudo needed)
-curl -sL -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-9.8.2-bin.zip
-unzip -q /tmp/gradle.zip -d ~/.local/share/
-ln -sf ~/.local/share/gradle-9.8.2/bin/gradle ~/.local/bin/gradle
-
-# ~/.local/bin comes before /usr/bin in PATH, so this shadows the old apt version
-gradle --version
-```
-
-```text
-------------------------------------------------------------
-Gradle 9.8.2
-------------------------------------------------------------
-Launcher JVM:  21.0.12.1 (Ubuntu)
-```
-
-> Alternatively: `sdk install gradle 9.8.2` via SDKMAN, or use the included **Gradle Wrapper** (`./gradlew`) which downloads the correct Gradle version automatically — no manual install needed.
-
-> **Note:** if `gradle` still runs the old version in an already-open terminal, it's bash's command cache — run `hash -r` (or open a new terminal) as shown below.
-
----
+**Fix:** install a current Gradle (9.8.2 here)
 
 ## Step 1: Install Gradle
 
@@ -106,7 +82,7 @@ BUILD SUCCESSFUL in 18s
 
 ![gradle test — BUILD SUCCESSFUL](images/gradle-test-success.png)
 
-Test report (`build/test-results/test/TEST-com.example.calculator.CalculatorTest.xml`): **tests="5" failures="0" errors="0"** ✅
+Test report (`build/test-results/test/TEST-com.example.calculator.CalculatorTest.xml`): **tests="5" failures="0" errors="0"** 
 
 ## Step 4: Build the App (Generate the Artifact)
 
@@ -193,7 +169,7 @@ Multiply: 28.0
 Divide: 1.75
 ```
 
-All results correct → **app verified working** ✅
+All results correct → **app verified working** 
 
 ---
 
@@ -201,12 +177,12 @@ All results correct → **app verified working** ✅
 
 | Task | Command | Result |
 |------|---------|--------|
-| Install Gradle | `gradle --version` | Gradle 9.8.2 (replaced apt's 4.4.1) ✅ |
-| Get source | included in this folder (from CalculatorGradleApp) | ✅ |
-| Run unit tests | `gradle test` | 5/5 tests passed ✅ |
-| Build app | `gradle build` | `build/libs/calculator.jar` generated ✅ |
-| Run app | `java -jar build/libs/calculator.jar` | Runs ✅ |
-| Verify app | enter `10` and `5` | Sum 15.0, Sub 5.0, Mul 50.0, Div 2.0 ✅ |
+| Install Gradle | `gradle --version` | Gradle 9.8.2 (replaced apt's 4.4.1) |
+| Get source | included in this folder (from CalculatorGradleApp) | |
+| Run unit tests | `gradle test` | 5/5 tests passed |
+| Build app | `gradle build` | `build/libs/calculator.jar` generated  |
+| Run app | `java -jar build/libs/calculator.jar` | Runs |
+| Verify app | enter `10` and `5` | Sum 15.0, Sub 5.0, Mul 50.0, Div 2.0 |
 
 ## Maven vs Gradle (Lab 1 vs Lab 2)
 
