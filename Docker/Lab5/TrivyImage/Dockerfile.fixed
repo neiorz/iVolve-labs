@@ -1,0 +1,15 @@
+# Lab 5 bonus: remediated image
+# updated base image (node:18-bullseye is end-of-life) + patched dependencies from package.json
+FROM node:24-alpine
+
+WORKDIR /app
+
+COPY package.json ./
+
+RUN npm install
+
+COPY app.js ./
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
