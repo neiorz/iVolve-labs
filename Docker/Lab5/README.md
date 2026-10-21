@@ -33,11 +33,11 @@ Scan a Docker image for known vulnerabilities with Trivy (full scan, HIGH/CRITIC
 | 3 | Install Trivy and verify | install script, then `trivy --version` | `lab5-install.png` |
 | 4 | Full scan | `trivy image trivy-lab:v1` | `lab5-scan.png` |
 | 5 | HIGH and CRITICAL only | `trivy image --severity HIGH,CRITICAL trivy-lab:v1` | `lab5-scan-hc.png` |
-| 6 | Generate the HTML report | `trivy image --format html -o trivy-report.html trivy-lab:v1`, `ls -lh` | `lab5-report1.png` |
+| 6 | Generate the HTML report | `trivy image --format template --template @html.tpl -o trivy-report.html trivy-lab:v1`, `ls -lh` | `lab5-report1.png` |
 | 7 | Review the report | open `trivy-report.html` in the browser | `lab5-report1-browser.png` |
 | 8 | The fix (base image + dependency) | `cat Dockerfile.fixed`, `cat package.json` | `lab5-fix-files.png` |
 | 9 | Rebuild as v2 | `docker build -f Dockerfile.fixed -t ivolve-app:v2 .` | `lab5-build-v2.png` |
 | 10 | Rescan v2 for HIGH/CRITICAL | `trivy image --severity HIGH,CRITICAL ivolve-app:v2` | `lab5-rescan.png` |
-| 11 | New HTML report and review | `trivy image --format html -o trivy-report-v2.html ivolve-app:v2`, open it | `lab5-report2-browser.png` |
+| 11 | New HTML report and review | `trivy image --format template --template @html.tpl -o trivy-report-v2.html ivolve-app:v2`, open it | `lab5-report2-browser.png` |
 
-Notes for the run: the first scan downloads Trivy's vulnerability database (give it a minute), the first build pulls the `node:18-bullseye` base (a few minutes), and the two HTML reports are kept in the repo as evidence. Steps and screenshots get added here after the run, same style as the other labs.
+Notes for the run: the first scan downloads Trivy's vulnerability database (give it a minute) and the first build pulls the `node:18-bullseye` base (a few minutes). The installed Trivy (0.76.1) has no `--format html` flag, so the HTML reports are generated with Trivy's own template: `html.tpl` in this folder (taken from Trivy v0.76.1 contrib; the `@` prefix means "file path") used with `--format template`. The generated reports are large (the v1 one is ~40MB) and stay out of git — the screenshots are the evidence. Steps and screenshots get added here after the run, same style as the other labs.
