@@ -1,0 +1,27 @@
+# Lab 4: optimized multi-stage Dockerfile
+
+# ---- Stage 1: build (same as the original Dockerfile) ----
+FROM maven:3.9.15-eclipse-temurin-17-alpine AS build
+
+WORKDIR /app
+
+COPY . .
+
+RUN mvn package
+
+# ---- Stage 2: runtime only, non-root ----
+FROM eclipse-temurin:17-jre-alpine
+
+# working directory
+WORKDIR /app
+
+# non-root user (BusyBox adduser on alpine)
+RUN adduser -D -u 1000 appuser
+
+# only the built JAR comes over from stage 1
+COPY --from=build /app/target/demo-0.0.1-SNAPSHOT.jar app.jar
+
+# run the generated JAR, expose port 8080
+EXPOSE 8080
+USER appuser
+CMD ["java", "-jar", "app.jar"]
