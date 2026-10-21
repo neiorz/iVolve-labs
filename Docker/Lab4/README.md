@@ -69,6 +69,19 @@ First tries went wrong: `docker exec container1 id` answered `container ... is n
 
 That is the point of this task: `image1` runs as root.
 
+### image1 actually serving, after the port was freed
+
+```bash
+docker run -d --name container1-check -p 8080:8080 image1
+sleep 8
+curl http://localhost:8080
+docker rm -f container1-check
+```
+
+![container1-check running image1 and curl answering Hello from Dockerized Spring Boot](images/lab4-verify1.png)
+
+With the port free, the same image served for real: `curl` returned **`Hello from Dockerized Spring Boot!`**. The temporary container was removed right after (`container1-check` at the end of the output).
+
 ## Stop and Delete container1
 
 ```bash
