@@ -5,7 +5,11 @@
 
 ## Objective
 
-Run the same Python app three ways — environment variables passed on the run command, an env file, and variables baked into the image — while capping the container at 1 CPU and 256 MB, and verify each variation.
+Run the same Python app three ways 
+-environment variables passed on the run command
+-an env file
+-variables baked into the image 
+while capping the container at 1 CPU and 256 MB, and verify each variation.
 
 ## Lab Tasks
 
