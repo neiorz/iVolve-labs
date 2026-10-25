@@ -144,4 +144,3 @@ Both nodes are `Ready`, controlplane 13m old and node01 69 seconds old.
 
 All pods are `Running`: calico on the two nodes, CoreDNS, etcd, apiserver, controller-manager, scheduler and kube-proxy.
 
-The lab is finished. When the timer ends, Killercoda deletes these machines.
