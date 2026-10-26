@@ -1,21 +1,59 @@
 # Lab 10: Node Isolation Using Taints and Labels in Kubernetes
 
-- **Environment:** new Killercoda Kubernetes playground (killercoda.com/playgrounds → Kubernetes). The cluster there is already running: `controlplane` + `node01`, both Ready. Every command runs on the controlplane tab.
-- **Goal:** isolate the worker node with a taint, mark it with a label, and prove both are there.
+![lab10 instructions](images/lab10-instructions.png)
 
-## Lab Tasks
+For this lab I opened a new Kubernetes playground on Killercoda. The cluster was already running there, `controlplane` and `node01`, both Ready. I did everything from the controlplane tab with kubectl, working on the worker node `node01`.
 
-- [ ] Apply a taint to the worker node with key `workload`, value `ivolveApp`, and effect `NoSchedule`, so pods without a matching toleration cannot be scheduled there.
-- [ ] Label the same worker node with `project=ivolve` to identify it for targeted pod scheduling.
-- [ ] Verify the taint and the label with `kubectl describe node` and `kubectl get nodes --show-labels`.
+## Check the nodes first
 
-## Screenshot Moments
+```bash
+kubectl get nodes
+```
 
-| File | What it shows |
-|---|---|
-| `images/lab10-instructions.png` | The lab slide |
-| `images/lab10-nodes.png` | `kubectl get nodes` before the changes, both nodes Ready |
-| `images/lab10-taint.png` | The taint command answering `node/node01 tainted` |
-| `images/lab10-label.png` | The label command answering `node/node01 labeled` |
-| `images/lab10-describe.png` | `kubectl describe node node01` with the Taints line and the label |
-| `images/lab10-showlabels.png` | `kubectl get nodes --show-labels` showing `project=ivolve` |
+![kubectl get nodes showing both nodes Ready](images/lab10-nodes.png)
+
+Both nodes Ready, Kubernetes v1.37.1.
+
+## Taint the worker node
+
+```bash
+kubectl taint nodes node01 workload=ivolveApp:NoSchedule
+```
+
+![node01 tainted](images/lab10-taint.png)
+
+It answered `node/node01 tainted`. From now pods without a matching toleration are not scheduled on node01.
+
+## Label the worker node
+
+```bash
+kubectl label node node01 project=ivolve
+```
+
+![node01 labeled](images/lab10-label.png)
+
+First I forgot the word `node` in the command and got `error: the server doesn't have a resource type "node01"`. I added `node` and then it answered `node/node01 labeled`.
+
+## Verify with kubectl describe node
+
+```bash
+kubectl describe node node01
+```
+
+![describe node01 with project=ivolve label and the taint line](images/lab10-describe.png)
+
+In the output I can see both things:
+- `Labels:` contains `project=ivolve`
+- `Taints:` shows `workload=ivolveApp:NoSchedule`
+
+## Verify with kubectl get nodes --show-labels
+
+```bash
+kubectl get nodes --show-labels
+```
+
+![get nodes --show-labels showing project=ivolve on node01](images/lab10-showlabels.png)
+
+The labels column for node01 ends with `project=ivolve`, controlplane does not have it.
+
+The taint and the label are both on the worker node, so the node isolation lab is done.
