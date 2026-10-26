@@ -56,4 +56,4 @@ kubectl get nodes --show-labels
 
 The labels column for node01 ends with `project=ivolve`, controlplane does not have it.
 
-The taint and the label are both on the worker node, so the node isolation lab is done.
+The taint and the label are both on the worker node, and the node is isolated.
