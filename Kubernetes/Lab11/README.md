@@ -53,4 +53,4 @@ Kubernetes answers:
 
 And the quota itself shows `pods: 3/3`. (First I wrote `ivolveQuota` again in the get command and got `not found`, then the lowercase name showed the result.)
 
-The namespace isolates the project and the quota stops it at 3 pods, so the lab is done.
+The namespace isolates the project and the quota stops it at 3 pods.
