@@ -62,4 +62,4 @@ kubectl get secret ivolvesecret -n ivolve -o yaml
 
 `secret/ivolvesecret created`, and `-o yaml` shows the data back with exactly the same Base64 strings I put in the file, in the namespace `ivolve`, type `Opaque`.
 
-ConfigMap holds the plain values, Secret holds the encoded passwords, both live in the `ivolve` namespace — lab done.
+ConfigMap holds the plain values, Secret holds the encoded passwords, both live in the `ivolve` namespace 
