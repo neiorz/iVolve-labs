@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ivolvedbsvc
+  namespace: ivolve
+spec:
+  clusterIP: None
+  selector:
+    app: ivolve-mysql
+  ports:
+    - port: 3306
+      name: mysql
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: ivolvedb
+  namespace: ivolve
+spec:
+  serviceName: "ivolvedbsvc"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ivolve-mysql
+  template:
+    metadata:
+      labels:
+        app: ivolve-mysql
+    spec:
+      nodeSelector:
+        project: ivolve
+      tolerations:
+      - key: "workload"
+        operator: "Equal"
+        value: "ivolveApp"
+        effect: "NoSchedule"
+      containers:
+      - name: mysql
+        image: mysql:8.0
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: "secretpassword"
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
