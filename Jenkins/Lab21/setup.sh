@@ -165,12 +165,12 @@ Still to do by hand:
      -> Add Credentials -> Username with password
         Username : your Docker Hub account
         Password : a Docker Hub access token
-        ID       : dockerhub
-  2. New Item -> Pipeline -> name it demoapp-pipeline
-     -> Pipeline script -> paste Jenkins/Lab21/Jenkinsfile -> Save
+        ID       : docker-hub-credentials   (must match the Jenkinsfile)
+  2. New Item -> Pipeline -> name it DemoApp
+     -> Pipeline script from SCM -> Git
+        Repository : https://github.com/neiorz/DemoApp.git
+        Branch     : */main
+        Script Path: Jenkinsfile  (lightweight checkout on)
   3. Open the job and press "Build Now".
-
-If the Docker Hub repository is public, the imagePullSecrets entry in
-k8s/deployment.yaml is simply unused; it does not break the deployment.
 
 INFO
