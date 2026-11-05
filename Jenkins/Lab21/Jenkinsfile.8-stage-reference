@@ -1,0 +1,212 @@
+pipeline {
+  agent any
+
+  options {
+    timestamps()
+    disableConcurrentBuilds()
+    // The pipeline clones the repository itself in the first stage.
+    skipDefaultCheckout(true)
+    buildDiscarder(logRotator(numToKeepStr: '10', artifactNumToKeepStr: '10'))
+    timeout(time: 45, unit: 'MINUTES')
+  }
+
+  environment {
+    // Username-with-password credential created in Jenkins with the id
+    // "dockerhub". It exports DOCKERHUB_USR and DOCKERHUB_PSW (masked).
+    DOCKERHUB = credentials('dockerhub')
+
+    APP_REPO       = 'https://github.com/Ibrahim-Adel15/DemoApp.git'
+    APP_DIR        = 'demoapp'
+    IMAGE_NAME     = 'demoapp'
+    NAMESPACE      = 'ivolve'
+    NODE_PORT      = '30080'
+    // Manifests baked into the Jenkins image by docker/Dockerfile. If the job
+    // happens to have a full checkout of this repository (lightweight
+    // checkout disabled), the "k8s" folder in the workspace is used first.
+    MANIFESTS_SRC  = '/opt/lab21/manifests'
+    TRIVY_SEVERITY = 'HIGH,CRITICAL'
+  }
+
+  stages {
+    stage('Clone source code') {
+      steps {
+        sh '''
+          rm -rf "$APP_DIR" trivy-report.txt
+          git clone --depth 1 "$APP_REPO" "$APP_DIR"
+          git -C "$APP_DIR" log -1 --oneline
+        '''
+      }
+    }
+
+    stage('Build app') {
+      steps {
+        dir('demoapp') {
+          sh 'mvn -B -ntp -DskipTests clean package'
+          sh 'test -f target/demo-0.0.1-SNAPSHOT.jar'
+          sh 'ls -lh target/demo-0.0.1-SNAPSHOT.jar'
+        }
+        archiveArtifacts artifacts: 'demoapp/target/*.jar', fingerprint: true
+      }
+    }
+
+    stage('Build Docker image') {
+      steps {
+        script {
+          // A unique tag per build makes the deployment change visible and
+          // makes a rollback a matter of choosing an older tag.
+          def sha = sh(
+            returnStdout: true,
+            script: "git -C ${env.APP_DIR} rev-parse --short=7 HEAD"
+          ).trim()
+          env.IMAGE_TAG = "${env.BUILD_NUMBER}-${sha}"
+          env.IMAGE = "${env.DOCKERHUB_USR}/${env.IMAGE_NAME}:${env.IMAGE_TAG}".toLowerCase()
+        }
+        sh '''
+          echo "Building $IMAGE"
+          docker build --pull -t "$IMAGE" "$APP_DIR"
+          docker image inspect "$IMAGE" --format 'tags: {{.RepoTags}}  size: {{.Size}}'
+        '''
+      }
+    }
+
+    stage('Scan Docker image') {
+      steps {
+        sh '''
+          rm -f trivy-report.txt
+          trivy image --no-progress \
+            --timeout 30m \
+            --scanners vuln \
+            --severity "$TRIVY_SEVERITY" \
+            --ignore-unfixed \
+            --exit-code 0 \
+            --format table \
+            --output trivy-report.txt \
+            "$IMAGE"
+          head -n 30 trivy-report.txt
+        '''
+      }
+    }
+
+    stage('Push image to DockerHub') {
+      steps {
+        sh '''
+          trap 'docker logout >/dev/null 2>&1 || true' EXIT
+          echo "$DOCKERHUB_PSW" | docker login -u "$DOCKERHUB_USR" --password-stdin
+          docker push "$IMAGE"
+        '''
+      }
+    }
+
+    stage('Delete image locally') {
+      steps {
+        sh '''
+          docker rmi -f "$IMAGE"
+          docker image prune -f --filter "dangling=true"
+          if docker image inspect "$IMAGE" >/dev/null 2>&1; then
+            echo "image is still present"
+            exit 1
+          fi
+          echo "image $IMAGE removed from the local daemon"
+        '''
+      }
+    }
+
+    stage('Update image in deployment file') {
+      steps {
+        sh '''
+          set -eu
+          src="$MANIFESTS_SRC"
+          if [ ! -d "$src" ] && [ -d k8s ]; then
+            src=k8s
+          fi
+          if [ ! -d "$src" ]; then
+            echo "No manifests found in $MANIFESTS_SRC or ./k8s" >&2
+            exit 1
+          fi
+
+          rm -rf manifests
+          cp -r "$src" manifests
+          sed -E -i "s#^([[:space:]]*image:[[:space:]]*).*#\\1${IMAGE}#" manifests/deployment.yaml
+
+          grep -n "image:" manifests/deployment.yaml
+          # Exactly one container image must point at the new tag, otherwise
+          # the sed above matched nothing or too much.
+          test "$(grep -Fc "image: ${IMAGE}" manifests/deployment.yaml)" -eq 1
+        '''
+      }
+    }
+
+    stage('Deploy to Kubernetes cluster') {
+      steps {
+        sh '''
+          set -eu
+
+          # The namespace has to exist before its resources; applying the
+          # whole folder would visit deployment.yaml first.
+          kubectl apply -f manifests/namespace.yaml
+
+          # Public Docker Hub repositories need nothing here, but the same
+          # credential keeps a private repository working.
+          kubectl -n "$NAMESPACE" create secret docker-registry dockerhub \
+            --docker-server=https://index.docker.io/v1/ \
+            --docker-username="$DOCKERHUB_USR" \
+            --docker-password="$DOCKERHUB_PSW" \
+            --dry-run=client -o yaml | kubectl apply -f -
+
+          kubectl apply -f manifests/
+          kubectl -n "$NAMESPACE" annotate deployment/demoapp \
+            kubernetes.io/change-cause="jenkins build ${BUILD_NUMBER}: ${IMAGE}" --overwrite
+          kubectl -n "$NAMESPACE" rollout status deployment/demoapp --timeout=240s
+          kubectl -n "$NAMESPACE" get deploy,pods,svc -o wide
+        '''
+        sh '''
+          set -eu
+          # Reach the service the same way a user would, through the cluster
+          # network, without depending on a NodePort being routable from the
+          # Jenkins container.
+          kubectl -n "$NAMESPACE" port-forward svc/demoapp 18080:8080 >/tmp/port-forward.log 2>&1 &
+          pf=$!
+          trap 'kill "$pf" 2>/dev/null || true' EXIT
+
+          for _ in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:18080/; then
+              echo
+              echo "smoke test passed"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "smoke test failed" >&2
+          cat /tmp/port-forward.log >&2
+          exit 1
+        '''
+      }
+    }
+  }
+
+  post {
+    always {
+      sh 'docker logout >/dev/null 2>&1 || true'
+      archiveArtifacts artifacts: 'trivy-report.txt', allowEmptyArchive: true, fingerprint: true
+      echo "Build #${env.BUILD_NUMBER} finished with status: ${currentBuild.currentResult}"
+    }
+
+    success {
+      echo "Image ${env.IMAGE} was pushed and deployed to namespace ${env.NAMESPACE}"
+      sh '''
+        node_ip=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null || true)
+        echo "Application: http://${node_ip:-<node-ip>}:$NODE_PORT"
+        kubectl -n "$NAMESPACE" get pods -o wide || true
+      '''
+    }
+
+    failure {
+      echo "Build failed, collecting the state of the deployment for the log"
+      sh 'docker images | head -n 10 || true'
+      sh 'kubectl -n "$NAMESPACE" get pods -o wide || true'
+      sh 'kubectl -n "$NAMESPACE" describe deployment demoapp || true'
+      sh 'kubectl -n "$NAMESPACE" get events --sort-by=.lastTimestamp 2>/dev/null | tail -n 20 || true'
+    }
+  }
+}
