@@ -215,9 +215,7 @@ enabled
 
 ![Jenkins package installed, service active and enabled, and the login page returning status 200](images/lab25-verify-jenkins.png)
 
-From the host browser, `http://10.97.0.129:8080` shows the **Unlock Jenkins** page. This Jenkins is separate from the Jenkins container used in Labs 21-23, which runs on the host at port 8081.
-
-![Unlock Jenkins page opened at 10.97.0.129:8080](images/lab25-jenkins-unlock.png)
+This Jenkins is separate from the Jenkins container used in Labs 21-23, which runs on the host at port 8081.
 
 ---
 
@@ -258,4 +256,4 @@ multipass delete managed-node && multipass purge
 - A single **playbook** (`playbook.yml`) installs **Docker**, **kubectl v1.35.1** and **Jenkins 2.580.2** (with Java 21) on the managed node.
 - The first run took **1 min 52 s** with `ok=11 changed=5 failed=0`; the second run reported **`changed=0`**, which proves the playbook is idempotent.
 - `--check` was used first as a dry run; it stops at the Jenkins install only because the repository is simulated in check mode.
-- The result was verified five ways: tool versions, the Jenkins package, the service state (`active` and `enabled`), an HTTP 200 from the login page, and the Unlock Jenkins page in the browser.
+- The result was verified four ways: tool versions, the Jenkins package, the service state (`active` and `enabled`), and an HTTP 200 from the login page.
